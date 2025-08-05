@@ -124,7 +124,7 @@ resource "aws_lb_listener" "http_listener" {
 
 resource "aws_vpc_security_group_ingress_rule" "port-443-inbound" {
   security_group_id = aws_security_group.mariam-sg-alb.id
-  cidr_ipv4         = aws_vpc.mariam-3tierApp-IaC.cidr_block
+  cidr_ipv4         = "0.0.0.0/0"
   from_port         = 443
   ip_protocol       = "tcp"
   to_port           = 443
@@ -132,7 +132,7 @@ resource "aws_vpc_security_group_ingress_rule" "port-443-inbound" {
 
 resource "aws_vpc_security_group_ingress_rule" "port-80-inbound" {
   security_group_id = aws_security_group.mariam-sg-alb.id
-  cidr_ipv4         = aws_vpc.mariam-3tierApp-IaC.cidr_block
+  cidr_ipv4         = "0.0.0.0/0"
   from_port         = 80
   ip_protocol       = "tcp"
   to_port           = 80
