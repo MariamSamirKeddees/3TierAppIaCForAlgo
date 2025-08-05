@@ -295,7 +295,17 @@ resource "aws_lb" "mariam-alb" {
   tags = {
     Name        = "mariam-alb-IaC"
   }
+
+   enable_http2               = true
+  drop_invalid_header_fields = true
+  idle_timeout               = 60
+
+    lifecycle {
+    create_before_destroy = true
+  }
 } 
+
+data "aws_caller_identity" "current" {}
 
 resource "aws_lb_target_group" "mariam-tg" {
   name     = "mariam-tg-IaC"
@@ -589,3 +599,12 @@ resource "aws_db_instance" "rds_mysql" {
   depends_on = [aws_db_subnet_group.rds_subnet_group]
 }
 
+output "alb_dns_name" {
+  description = "The DNS name of the Application Load Balancer"
+  value       = aws_lb.mariam-alb.dns_name
+}
+
+output "alb_url" {
+  description = "The full URL to access the application"
+  value       = "http://${aws_lb.mariam-alb.dns_name}"
+}
