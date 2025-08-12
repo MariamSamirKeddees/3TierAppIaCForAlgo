@@ -24,7 +24,21 @@ module "route_tables" {
   private_subnet_ids = module.subnets.private_subnet_ids
 }
 
-#module "public_rt_assoc"{
-#  source = "./modules/route_tables"
-#
-#}
+module "nat" {
+  source            = "./modules/nat"
+  azs               = var.azs
+  public_subnet_ids = module.subnets.public_subnet_ids
+}
+
+module "alb" {
+  source             = "./modules/alb"
+  vpc_id             = module.vpc.vpc_id
+  public_subnet_ids  = module.subnets.public_subnet_ids
+  security_group_ids = [module.sg.security_group_ids["mariam-alb_sg-IaC"]]
+}
+
+module "sg" {
+  source          = "./modules/security_groups"
+  vpc_id          = module.vpc.vpc_id
+  security_groups = var.security_groups
+}
