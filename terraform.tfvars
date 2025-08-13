@@ -24,7 +24,8 @@ security_groups = {
 
   mariam-fe_sg-IaC = {
     ingress = [
-      { from_port = 80, to_port = 80, protocol = "tcp", sg_sources = ["lb_sg"] }
+      { from_port = 80, to_port = 80, protocol = "tcp", sg_sources = ["lb_sg"] },
+      { from_port = 22, to_port = 22, protocol = "tcp", cidr_blocks = ["102.44.195.74/32"] }
     ]
     egress = [
       { from_port = 0, to_port = 0, protocol = "-1", cidr_blocks = ["0.0.0.0/0"] }
@@ -49,3 +50,16 @@ security_groups = {
     ]
   }
 }
+
+
+
+ami_id              = "ami-08c40ec9ead489470"
+instance_type       = "t2.micro"
+fe_subnet_ids       = ["subnet-062bb44675e1e9355", "subnet-0ddbe07a005dd277c"]
+fe_sg_id            = "sg-01971f6910e79a0fc"
+desired_capacity    = 2
+min_size            = 1
+max_size            = 4
+key_name            = "mariam-ssh-3tier"
+name                = "mariam-nginx-IaC"
+

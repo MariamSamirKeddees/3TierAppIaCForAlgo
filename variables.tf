@@ -30,3 +30,39 @@ variable "security_groups" {
     }))
   }))
 }
+
+variable "ami_id" {
+  type = string
+}
+
+variable "instance_type" {
+  type = string
+}
+
+variable "fe_subnet_ids" {
+  type = list(string)
+}
+
+variable "fe_sg_id" {
+  type = string
+}
+
+variable "min_size" {
+  type = number
+}
+
+variable "max_size" {
+  type = number
+}
+
+variable "desired_capacity" {
+  type = number
+}
+
+variable "key_name" {
+  type = string
+}
+
+variable "name" {
+  type = string
+}
