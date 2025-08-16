@@ -32,6 +32,12 @@ EOF
       Name = "${var.name}-instance"
     })
   }
+
+  network_interfaces {
+    associate_public_ip_address = true
+    security_groups             = [var.fe_sg_id]
+  }
+
 }
 
 resource "aws_autoscaling_group" "this" {
