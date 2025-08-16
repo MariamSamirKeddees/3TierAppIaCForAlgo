@@ -1,81 +1,100 @@
-# Step 1 - create empty SGs
+# -------------------------
+# Step 1: Create empty SGs
+# -------------------------
 resource "aws_security_group" "sg" {
   for_each = var.security_groups
-  name     = "${each.key}"
+  name     = each.key
   vpc_id   = var.vpc_id
 
-
-  # Inline ingress rules
-  dynamic "ingress" {
-    for_each = each.value.ingress
-    content {
-      from_port        = ingress.value.from_port
-      to_port          = ingress.value.to_port
-      protocol         = ingress.value.protocol
-      cidr_blocks      = lookup(ingress.value, "cidr_blocks", null)
-      ipv6_cidr_blocks = lookup(ingress.value, "ipv6_cidr_blocks", null)
-      security_groups  = lookup(ingress.value, "security_groups", null)
-    }
+  tags = {
+    Name = each.key
   }
-
-  # Inline egress rules
-  dynamic "egress" {
-    for_each = each.value.egress
-    content {
-      from_port        = egress.value.from_port
-      to_port          = egress.value.to_port
-      protocol         = egress.value.protocol
-      cidr_blocks      = lookup(egress.value, "cidr_blocks", null)
-      ipv6_cidr_blocks = lookup(egress.value, "ipv6_cidr_blocks", null)
-      security_groups  = lookup(egress.value, "security_groups", null)
-    }
-  }
-
-    tags = {
-      Name = "${each.key}"
-    }
 }
 
-# Step 2 - add rules after all SGs exist
+# -------------------------
+# Step 2: Add SG Rules
+# -------------------------
 
+# ALB inbound (public internet → ALB on 80 & 443)
+resource "aws_security_group_rule" "alb_http_in" {
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  ipv6_cidr_blocks  = ["::/0"]
+  security_group_id = aws_security_group.sg["mariam-alb_sg-IaC"].id
+}
 
-# Ingress rules
-#resource "aws_security_group_rule" "ingress" {
-#  for_each = {
-#    for sg_name, sg_data in var.security_groups :
-#    "${sg_name}-ingress" => {
-#      sg_id    = aws_security_group.sg[sg_name].id
-#      rules    = sg_data.ingress #this extracts ingress rules from each sg_data
-#    }
-#  }
-#
-#  type              = "ingress"
-#  from_port         = each.value.rules[0].from_port
-#  to_port           = each.value.rules[0].to_port
-#  protocol          = each.value.rules[0].protocol
-#  security_group_id = each.value.sg_id
-#  cidr_blocks       = try(each.value.rules[0].cidr_blocks, [])
-#  source_security_group_id = try(
-#    aws_security_group.sg[each.value.rules[0].sg_sources[0]].id,
-#    null
-#  )
-#    depends_on = [aws_security_group.sg] 
-#}
-#
-## Egress rules
-#resource "aws_security_group_rule" "egress" {
-#  for_each = {
-#    for sg_name, sg_data in var.security_groups :
-#    "${sg_name}-egress" => {
-#      sg_id    = aws_security_group.sg[sg_name].id
-#      rules    = sg_data.egress
-#    }
-#  }
-#
-#  type              = "egress"
-#  from_port         = each.value.rules[0].from_port
-#  to_port           = each.value.rules[0].to_port
-#  protocol          = each.value.rules[0].protocol
-#  security_group_id = each.value.sg_id
-#  cidr_blocks       = each.value.rules[0].cidr_blocks
-#}
+resource "aws_security_group_rule" "alb_https_in" {
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  ipv6_cidr_blocks  = ["::/0"]
+  security_group_id = aws_security_group.sg["mariam-alb_sg-IaC"].id
+}
+
+# FE inbound (only from ALB on 80, 443, and SSH if you want)
+resource "aws_security_group_rule" "fe_http_in" {
+  type                     = "ingress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.sg["mariam-alb_sg-IaC"].id
+  security_group_id        = aws_security_group.sg["mariam-fe_sg-IaC"].id
+}
+
+resource "aws_security_group_rule" "fe_https_in" {
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.sg["mariam-alb_sg-IaC"].id
+  security_group_id        = aws_security_group.sg["mariam-fe_sg-IaC"].id
+}
+
+resource "aws_security_group_rule" "fe_ssh_in" {
+  type              = "ingress"
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks       = ["41.43.109.133/32"] # replace with your IP
+  security_group_id = aws_security_group.sg["mariam-fe_sg-IaC"].id
+}
+
+# BE inbound (only from FE on 8080)
+resource "aws_security_group_rule" "be_app_in" {
+  type                     = "ingress"
+  from_port                = 8080
+  to_port                  = 8080
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.sg["mariam-fe_sg-IaC"].id
+  security_group_id        = aws_security_group.sg["mariam-be_sg-IaC"].id
+}
+
+# DB inbound (only from BE on 3306)
+resource "aws_security_group_rule" "db_mysql_in" {
+  type                     = "ingress"
+  from_port                = 3306
+  to_port                  = 3306
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.sg["mariam-be_sg-IaC"].id
+  security_group_id        = aws_security_group.sg["mariam-db_sg-IaC"].id
+}
+
+# -------------------------
+# Step 3: Egress (allow all)
+# -------------------------
+resource "aws_security_group_rule" "all_egress" {
+  for_each = aws_security_group.sg
+
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  ipv6_cidr_blocks  = ["::/0"]
+  security_group_id = each.value.id
+}

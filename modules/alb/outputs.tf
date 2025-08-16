@@ -7,8 +7,11 @@ output "fe_tg_arn" {
 
 
 output "be_tg_arn" {
-  description = "ARN of the backend target group"
   value       = aws_lb_target_group.be_tg.arn
+}
+
+output "listener_arn"{
+  value = aws_lb_listener.http.arn
 }
 
 output "alb_arn" {

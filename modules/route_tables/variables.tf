@@ -1,5 +1,9 @@
 variable "vpc_id" {
-  type        = string
+  type = string
+}
+
+variable "azs" {
+  type = list(string)
 }
 
 variable "igw_id" {
@@ -11,5 +15,17 @@ variable "public_subnet_ids" {
 }
 
 variable "private_subnet_ids" {
-  type        = list(string)
+  type = list(string)
+}
+
+variable "be_subnet_ids"{
+  type = list(string)
+}
+
+variable "az_to_public_subnet" {
+  type = map(string)
+}
+
+variable "nat_gateway_ids" {
+  type = map(string)
 }

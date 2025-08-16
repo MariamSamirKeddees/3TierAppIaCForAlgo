@@ -17,18 +17,26 @@ module "igw" {
 }
 
 module "route_tables" {
-  source    = "./modules/route_tables"
-  vpc_id    = module.vpc.vpc_id
-  igw_id    = module.igw.igw_id
-  public_subnet_ids = module.subnets.public_subnet_ids
-  private_subnet_ids = module.subnets.private_subnet_ids
+  source              = "./modules/route_tables"
+  vpc_id              = module.vpc.vpc_id
+  igw_id              = module.igw.igw_id
+  public_subnet_ids   = module.subnets.public_subnet_ids
+  private_subnet_ids  = module.subnets.private_subnet_ids
+  be_subnet_ids       = var.be_subnet_ids
+  azs                 = var.azs
+  az_to_public_subnet = module.nat.az_to_public_subnet
+  nat_gateway_ids     = module.nat.nat_gateway_ids
+  
 }
 
 module "nat" {
   source            = "./modules/nat"
   azs               = var.azs
   public_subnet_ids = module.subnets.public_subnet_ids
+  be_subnet_ids  = var.be_subnet_ids  
+  private_rt_nat_ids = module.route_tables.private_rt_nat_ids
 }
+
 
 module "alb" {
   source             = "./modules/alb"
@@ -54,6 +62,15 @@ module "asg" {
   key_name            = var.key_name
   target_group_arns   = [module.alb.fe_tg_arn]
   fe_subnet_ids       = var.fe_subnet_ids
-  fe_sg_id            = var.fe_sg_id
+  fe_sg_id            = module.sg.security_group_ids["mariam-fe_sg-IaC"]
 
+}
+module "ecs_backend" {
+  source = "./modules/ecs"
+
+  name               = "mariam-be-ecs"
+  container_image    = "tiangolo/uwsgi-nginx-flask:python3.8"
+  be_subnet_ids = ["subnet-082ca8d172401961a", "subnet-0b3b99ae42959fd86"]
+  be_sg_id      = module.sg.be_sg_id
+  be_tg_arn     = module.alb.be_tg_arn
 }

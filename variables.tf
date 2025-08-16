@@ -66,3 +66,12 @@ variable "key_name" {
 variable "name" {
   type = string
 }
+
+#variable "nat_gateway_ids" {
+#  type = list(string)
+#}
+
+variable "be_subnet_ids"{
+  type = list(string)
+}
+

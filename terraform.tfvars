@@ -10,6 +10,11 @@ private_subnets = [
 ]
 azs = ["us-east-1a", "us-east-1b"]
 
+
+
+
+
+
 security_groups = {
   mariam-alb_sg-IaC = {
     ingress = [
@@ -34,7 +39,7 @@ security_groups = {
 
   mariam-be_sg-IaC = {
     ingress = [
-      { from_port = 8080, to_port = 8080, protocol = "tcp", sg_sources = ["interface_sg"] }
+      { from_port = 8080, to_port = 8080, protocol = "tcp", sg_sources = ["fe_sg"] }
     ]
     egress = [
       { from_port = 0, to_port = 0, protocol = "-1", cidr_blocks = ["0.0.0.0/0"] }
@@ -63,3 +68,4 @@ max_size            = 4
 key_name            = "mariam-ssh-3tier"
 name                = "mariam-nginx-IaC"
 
+be_subnet_ids       = ["subnet-082ca8d172401961a", "subnet-0b3b99ae42959fd86"]
