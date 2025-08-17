@@ -18,6 +18,9 @@ resource "aws_launch_template" "this" {
 
   user_data = base64encode(<<-EOF
     #!/bin/bash
+    sudo snap install amazon-ssm-agent --classic
+    sudo systemctl enable amazon-ssm-agent
+    sudo systemctl start amazon-ssm-agent
     exec > /var/log/user-data.log 2>&1
     set -x
     apt update -y
