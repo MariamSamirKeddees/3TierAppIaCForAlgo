@@ -31,20 +31,28 @@ resource "aws_ecs_task_definition" "this" {
   execution_role_arn       = aws_iam_role.task_execution_role.arn
 
   container_definitions = jsonencode([
-    {
-      name      = "backend"
-      image     = var.container_image
-      cpu       = 256
-      memory    = 512
-      essential = true
-      portMappings = [
-        {
-          containerPort = 5000
-          hostPort      = 5000
-          protocol      = "tcp"
-        }
-      ]
+{
+    name      = "backend"
+    image     = var.container_image
+    cpu       = 256
+    memory    = 512
+    essential = true
+    portMappings = [
+      {
+        containerPort = 5000
+        hostPort      = 5000
+        protocol      = "tcp"
+      }
+    ],
+    logConfiguration = {
+      logDriver = "awslogs",
+      options = {
+        awslogs-group         = "/ecs/mariam-backend"
+        awslogs-region        = "us-east-1"
+        awslogs-stream-prefix = "ecs"
+      }
     }
+  }
   ])
 }
 
