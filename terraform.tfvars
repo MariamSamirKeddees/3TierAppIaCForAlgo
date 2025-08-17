@@ -11,10 +11,6 @@ private_subnets = [
 azs = ["us-east-1a", "us-east-1b"]
 
 
-
-
-
-
 security_groups = {
   mariam-alb_sg-IaC = {
     ingress = [

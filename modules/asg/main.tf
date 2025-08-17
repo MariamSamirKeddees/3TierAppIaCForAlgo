@@ -18,6 +18,8 @@ resource "aws_launch_template" "this" {
 
   user_data = base64encode(<<-EOF
     #!/bin/bash
+    exec > /var/log/user-data.log 2>&1
+    set -x
     apt update -y
     apt install nginx -y
     systemctl enable nginx
@@ -33,11 +35,33 @@ EOF
     })
   }
 
-  network_interfaces {
-    associate_public_ip_address = true
-    security_groups             = [var.fe_sg_id]
+  iam_instance_profile {
+    name = aws_iam_instance_profile.ssm.name
   }
 
+}
+
+resource "aws_iam_role" "ssm" {
+  name = "mariam-ssm-role-IaC"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action = "sts:AssumeRole",
+      Effect = "Allow",
+      Principal = { Service = "ec2.amazonaws.com" }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ssm" {
+  role       = aws_iam_role.ssm.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_instance_profile" "ssm" {
+  name = "mariam-ssm-profile-IaC"
+  role = aws_iam_role.ssm.name
 }
 
 resource "aws_autoscaling_group" "this" {
@@ -53,9 +77,11 @@ resource "aws_autoscaling_group" "this" {
   }
   target_group_arns = var.target_group_arns
 
+
   tag {
     key                 = "Name"
     value               = "${var.name}-IaC"
     propagate_at_launch = true
   }
 }
+

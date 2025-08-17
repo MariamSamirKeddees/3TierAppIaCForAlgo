@@ -6,6 +6,6 @@ variable "fe_subnet_ids" { type = list(string) }
 variable "max_size" {}
 variable "min_size" {}
 variable "desired_capacity" {}
-variable "target_group_arns" { type = list(string) }
+variable "target_group_arns" {type = list(string) }
 variable "tags" { default = {} }
 variable "ami_id" {}
