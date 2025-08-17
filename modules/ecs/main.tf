@@ -47,7 +47,7 @@ resource "aws_ecs_task_definition" "this" {
     logConfiguration = {
       logDriver = "awslogs",
       options = {
-        awslogs-group         = "/ecs/mariam-backend"
+        awslogs-group         = "/ecs/mariam-backend-IaC"
         awslogs-region        = "us-east-1"
         awslogs-stream-prefix = "ecs"
       }
