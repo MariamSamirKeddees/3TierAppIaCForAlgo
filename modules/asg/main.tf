@@ -17,14 +17,11 @@ resource "aws_launch_template" "this" {
   vpc_security_group_ids = [var.fe_sg_id]
 
   user_data = base64encode(<<-EOF
-    #!/bin/bash
-    sudo snap install amazon-ssm-agent --classic
-    sudo systemctl enable amazon-ssm-agent
-    sudo systemctl start amazon-ssm-agent
+    #!/bin/bash  
     exec > /var/log/user-data.log 2>&1
     set -x
-    apt update -y
-    apt install nginx -y
+    apt-get update -y
+    apt-get install nginx -y
     systemctl enable nginx
     systemctl start nginx
 EOF
@@ -38,34 +35,33 @@ EOF
     })
   }
 
-  iam_instance_profile {
-    name = aws_iam_instance_profile.ssm.name
-  }
-
+#  iam_instance_profile {
+#    name = aws_iam_instance_profile.ssm.name
+#  }
+#
 }
 
-resource "aws_iam_role" "ssm" {
-  name = "mariam-ssm-role-IaC"
+#resource "aws_iam_role" "ssm" {
+#  name = "mariam-ssm-role-IaC"#
+# assume_role_policy = jsonencode({
+#   Version = "2012-10-17",
+#   Statement = [{
+#      Action = "sts:AssumeRole",
+#      Effect = "Allow",
+#      Principal = { Service = "ec2.amazonaws.com" }
+#    }]
+#  })
+#}
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Action = "sts:AssumeRole",
-      Effect = "Allow",
-      Principal = { Service = "ec2.amazonaws.com" }
-    }]
-  })
-}
+#resource "aws_iam_role_policy_attachment" "ssm" {
+#  role       = aws_iam_role.ssm.name
+#  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+#}
 
-resource "aws_iam_role_policy_attachment" "ssm" {
-  role       = aws_iam_role.ssm.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
-resource "aws_iam_instance_profile" "ssm" {
-  name = "mariam-ssm-profile-IaC"
-  role = aws_iam_role.ssm.name
-}
+#resource "aws_iam_instance_profile" "ssm" {
+#  name = "mariam-ssm-profile-IaC"
+#  role = aws_iam_role.ssm.name
+#}
 
 resource "aws_autoscaling_group" "this" {
   name                      = "${var.name}-IaC"

@@ -22,6 +22,10 @@ variable "be_subnet_ids"{
   type = list(string)
 }
 
+variable "fe_subnet_ids"{
+  type = list(string)
+}
+
 variable "az_to_public_subnet" {
   type = map(string)
 }

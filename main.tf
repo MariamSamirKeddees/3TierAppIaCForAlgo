@@ -26,6 +26,7 @@ module "route_tables" {
   azs                 = var.azs
   az_to_public_subnet = module.nat.az_to_public_subnet
   nat_gateway_ids     = module.nat.nat_gateway_ids
+  fe_subnet_ids       = var.fe_subnet_ids 
   
 }
 

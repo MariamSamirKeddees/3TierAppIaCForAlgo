@@ -39,8 +39,14 @@ resource "aws_route" "private_nat_route" {
   nat_gateway_id         = var.nat_gateway_ids[each.key]
 }
 
-resource "aws_route_table_association" "private_rt_nat_assoc" {
+resource "aws_route_table_association" "private_rt_be_nat_assoc" {
   for_each       = zipmap(var.azs, var.be_subnet_ids)
+  subnet_id      = each.value
+  route_table_id = aws_route_table.private_rt_nat[each.key].id
+}
+
+resource "aws_route_table_association" "private_rt_fe_nat_assoc" {
+  for_each       = zipmap(var.azs, var.fe_subnet_ids)
   subnet_id      = each.value
   route_table_id = aws_route_table.private_rt_nat[each.key].id
 }
