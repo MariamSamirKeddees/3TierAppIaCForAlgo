@@ -60,7 +60,7 @@ resource "aws_security_group_rule" "fe_ssh_in" {
   from_port         = 22
   to_port           = 22
   protocol          = "tcp"
-  cidr_blocks       = ["41.35.193.91/32"] # replace with your IP
+  cidr_blocks       = ["41.35.193.91/32"] 
   security_group_id = aws_security_group.sg["mariam-fe_sg-IaC"].id
 }
 

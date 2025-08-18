@@ -75,3 +75,16 @@ module "ecs_backend" {
   be_sg_id      = module.sg.be_sg_id
   be_tg_arn     = module.alb.be_tg_arn
 }
+
+module "db" {
+  source            = "./modules/db"
+  db_prefix_name    = var.db_prefix_name
+  instance_class    = var.instance_class
+  allocated_storage = var.allocated_storage
+  multi_az          = var.multi_az
+  db_name           = var.db_name
+  db_subnet_ids     = var.db_subnet_ids
+  db_sg_id          = var.db_sg_id
+  #db_host          = aws_db_instance.this.address  
+  db_username       = var.db_username
+}

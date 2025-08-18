@@ -65,3 +65,12 @@ key_name            = "mariam-ssh-3tier"
 name                = "mariam-nginx-IaC"
 
 be_subnet_ids       = ["subnet-082ca8d172401961a", "subnet-0b3b99ae42959fd86"]
+db_subnet_ids       = ["subnet-0a81671d43177440a", "subnet-06667d15f25fe1ab1"]
+db_prefix_name      = "mariam-db-iac"
+instance_class      = "db.t3.micro"
+allocated_storage   = 20
+multi_az            = true
+db_name             = "mariamdb"
+db_sg_id            = "sg-032f332a968f47929"
+#db_host             = 
+db_username         = "admin"
