@@ -17,3 +17,15 @@ variable "be_sg_id" {
 variable "be_tg_arn" {
   type        = string
 }
+
+variable "db_host" {
+  type = string
+}
+
+variable "db_secret_arn" {
+  type = string
+}
+
+variable "db_name" {
+  type = string
+}
